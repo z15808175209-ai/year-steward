@@ -34,36 +34,6 @@
 
 ---
 
-## 技术栈
-
-```
-Vite 5 + React 18 + TypeScript
-Tailwind CSS 3（自定义韩系盐系色板）
-Dexie.js（IndexedDB 本地数据库）
-Framer Motion（动效）
-lucide-react（图标）
-GitHub Actions + Pages（自动部署）
-```
-
----
-
-## 本地开发
-
-```bash
-npm install
-npm run dev
-# → http://localhost:5173/
-```
-
-## 构建
-
-```bash
-npm run build
-npm run preview
-```
-
----
-
 ## 项目入口
 
 | 入口 | 地址 |
@@ -89,20 +59,6 @@ https://z15808175209-ai.github.io/year-steward/
 
 ---
 
-## 设计规范
-
-| 色号 | 用途 |
-|---|---|
-| `#FCF5EC` | 奶白 · 页面底色 |
-| `#F1DBDB` | 樱粉 · 主色调 |
-| `#D4D1C6` | 米灰 · 边框 / 分隔线 |
-| `#938C83` | 深灰 · 文字 |
-| `#D88A8A` | 紧急（派生） |
-| `#A8C8B8` | 完成（派生） |
-
-圆角 `14px` · 无阴影 · 大量留白 · 莫兰迪低饱和
-
----
 
 ## 路线图
 
