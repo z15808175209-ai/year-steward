@@ -7,59 +7,29 @@ import Tasks from './pages/Tasks'
 import Countdowns from './pages/Countdowns'
 import Notes from './pages/Notes'
 import Review from './pages/Review'
-import AddRoutine from './pages/AddRoutine'
+import RoutineModal from './components/RoutineModal'
 import { db, seedIfEmpty } from './db'
-import type { Routine, Task } from './types'
+import { refreshAllRoutineStats } from './repo'
+import type { Routine } from './types'
 
 type Page = 'dashboard' | 'tasks' | 'countdowns' | 'notes' | 'review'
 
 export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
-  const [showAddRoutine, setShowAddRoutine] = useState(false)
-  const [seeded, setSeeded] = useState(false)
+  const [routineModal, setRoutineModal] = useState<{ open: boolean; editing?: Routine }>({ open: false })
+  const [ready, setReady] = useState(false)
 
-  // 首次访问填充 mock 数据
+  // 首次访问填充示例数据，并让 routine 统计与日志保持一致
   useEffect(() => {
-    seedIfEmpty().then(() => setSeeded(true))
+    seedIfEmpty()
+      .then(() => refreshAllRoutineStats())
+      .then(() => setReady(true))
   }, [])
 
-  // 实时从 IndexedDB 读取
   const routines = useLiveQuery(() => db.routines.toArray(), [], [])
   const tasks = useLiveQuery(() => db.tasks.toArray(), [], [])
   const countdowns = useLiveQuery(() => db.countdowns.toArray(), [], [])
   const notes = useLiveQuery(() => db.notes.toArray(), [], [])
-
-  const toggleTask = async (id: string) => {
-    const t = await db.tasks.get(id)
-    if (!t) return
-    await db.tasks.update(id, {
-      done: !t.done,
-      completedAt: !t.done ? new Date().toISOString() : undefined,
-    })
-  }
-
-  const addRoutine = async (routine: Routine) => {
-    await db.routines.put(routine)
-    setShowAddRoutine(false)
-  }
-
-  // 完成 routine（累加统计 + 记录完成时间）
-  const completeRoutine = async (id: string, state: 'done' | 'skip') => {
-    const r = await db.routines.get(id)
-    if (!r) return
-    if (state === 'done') {
-      await db.routines.update(id, {
-        totalCompletions: r.totalCompletions + 1,
-        currentStreak: r.currentStreak + 1,
-        longestStreak: Math.max(r.longestStreak, r.currentStreak + 1),
-      })
-    } else {
-      await db.routines.update(id, {
-        totalSkips: r.totalSkips + 1,
-        currentStreak: 0,
-      })
-    }
-  }
 
   const navItems = [
     { id: 'dashboard' as Page, label: '今日', icon: LayoutDashboard },
@@ -69,7 +39,7 @@ export default function App() {
     { id: 'review' as Page, label: '复盘', icon: BarChart3 },
   ]
 
-  if (!seeded) {
+  if (!ready) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-ash-light text-sm tracking-wider">加载中…</div>
@@ -95,9 +65,7 @@ export default function App() {
                 key={item.id}
                 onClick={() => setPage(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-soft text-sm transition-all ${
-                  active
-                    ? 'bg-sakura text-ash font-medium'
-                    : 'text-ash-light hover:bg-cream hover:text-ash'
+                  active ? 'bg-sakura text-ash font-medium' : 'text-ash-light hover:bg-cream hover:text-ash'
                 }`}
               >
                 <Icon size={16} strokeWidth={1.5} />
@@ -108,7 +76,7 @@ export default function App() {
         </nav>
 
         <button
-          onClick={() => setShowAddRoutine(true)}
+          onClick={() => setRoutineModal({ open: true })}
           className="mt-4 bg-sakura hover:bg-sakura/80 transition-colors rounded-soft py-2.5 px-3 text-sm text-ash font-medium flex items-center justify-center gap-2"
         >
           <Plus size={16} strokeWidth={2} />
@@ -132,12 +100,10 @@ export default function App() {
                 routines={routines}
                 tasks={tasks}
                 countdowns={countdowns}
-                onToggleTask={toggleTask}
-                onCompleteRoutine={completeRoutine}
-                onAddRoutine={() => setShowAddRoutine(true)}
+                onEditRoutine={(r) => setRoutineModal({ open: true, editing: r })}
               />
             )}
-            {page === 'tasks' && <Tasks tasks={tasks} onToggle={toggleTask} />}
+            {page === 'tasks' && <Tasks tasks={tasks} />}
             {page === 'countdowns' && <Countdowns countdowns={countdowns} />}
             {page === 'notes' && <Notes notes={notes} />}
             {page === 'review' && <Review routines={routines} tasks={tasks} />}
@@ -145,12 +111,12 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Add Routine Modal */}
+      {/* Routine Modal */}
       <AnimatePresence>
-        {showAddRoutine && (
-          <AddRoutine
-            onClose={() => setShowAddRoutine(false)}
-            onSave={addRoutine}
+        {routineModal.open && (
+          <RoutineModal
+            routine={routineModal.editing}
+            onClose={() => setRoutineModal({ open: false })}
           />
         )}
       </AnimatePresence>
