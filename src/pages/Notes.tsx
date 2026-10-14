@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Plus, Tag, Check } from 'lucide-react'
+import { Search, Plus, Tag, Check, FileText } from 'lucide-react'
 import type { Note } from '../types'
 import { createNote, deleteNote, parseTags, updateNote } from '../repo'
 import { formatTimestamp } from '../lib/date'
 import DeleteButton from '../components/DeleteButton'
+import EmptyState from '../components/EmptyState'
+import { Skeleton, SkeletonRow } from '../components/Skeleton'
 
 interface Props {
   notes: Note[] | undefined
@@ -16,12 +18,40 @@ interface Draft {
   tagsText: string
 }
 
-export default function Notes({ notes = [] }: Props) {
+export default function Notes({ notes }: Props) {
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [justCreated, setJustCreated] = useState<string | null>(null)
   const draftRef = useRef<Draft | null>(null)
+
+  // 弱网 / 首次加载：骨架屏占位
+  if (notes === undefined) {
+    return (
+      <div className="max-w-5xl mx-auto px-10 py-10">
+        <div className="mb-6">
+          <div className="text-[11px] tracking-[2px] text-ash-light mb-2">手帐 · 灵感</div>
+          <h1 className="text-3xl text-ash font-light">备忘录</h1>
+        </div>
+        <div className="grid grid-cols-[280px_1fr] gap-6">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-full" />
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+          </div>
+          <div className="bg-white rounded-soft p-8 border border-beige/40 space-y-4">
+            <Skeleton className="h-7 w-1/2" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-5/6" />
+            <Skeleton className="h-3 w-4/6" />
+            <Skeleton className="h-3 w-3/6" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const sorted = [...notes].sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
   const keyword = search.trim().toLowerCase()
@@ -201,9 +231,17 @@ export default function Notes({ notes = [] }: Props) {
                 className="w-full text-sm text-ash leading-relaxed bg-transparent focus:outline-none resize-none placeholder:text-ash-light/60"
               />
             </motion.div>
+          ) : notes.length === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title="还没有笔记"
+              hint="一闪而过的念头、读到的句子、想以后再看的事——丢进来，自动保存。"
+              actionLabel="新建第一条笔记"
+              onAction={handleCreate}
+            />
           ) : (
             <div className="bg-cream/50 rounded-soft p-12 text-center text-ash-light text-sm">
-              {notes.length === 0 ? '点「新建笔记」写下第一条' : '选择一条笔记查看'}
+              选择一条笔记查看
             </div>
           )}
         </div>

@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Calendar, Pencil } from 'lucide-react'
+import { Plus, Calendar, Pencil, Timer } from 'lucide-react'
 import type { Countdown, CountdownCategory } from '../types'
 import { deleteCountdown } from '../repo'
 import { daysUntil } from '../lib/date'
 import CountdownModal from '../components/CountdownModal'
 import DeleteButton from '../components/DeleteButton'
+import EmptyState from '../components/EmptyState'
+import { SkeletonCard } from '../components/Skeleton'
 
 interface Props {
   countdowns: Countdown[] | undefined
@@ -24,8 +26,27 @@ function urgencyStyle(days: number) {
   return { color: 'text-[#5A8FA8]', bg: 'bg-[#A8C8D8]/20', label: '远期' }
 }
 
-export default function Countdowns({ countdowns = [] }: Props) {
+export default function Countdowns({ countdowns }: Props) {
   const [modal, setModal] = useState<{ open: boolean; editing?: Countdown }>({ open: false })
+  const openCreate = () => setModal({ open: true })
+
+  // 弱网 / 首次加载：骨架屏占位
+  if (countdowns === undefined) {
+    return (
+      <div className="max-w-4xl mx-auto px-10 py-10">
+        <div className="mb-8">
+          <div className="text-[11px] tracking-[2px] text-ash-light mb-2">重要日期</div>
+          <h1 className="text-3xl text-ash font-light">倒计时</h1>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    )
+  }
 
   const sorted = [...countdowns].sort((a, b) => {
     const da = daysUntil(a.date)
@@ -45,7 +66,7 @@ export default function Countdowns({ countdowns = [] }: Props) {
           <p className="text-sm text-ash-light mt-2">颜色随紧急度变化 · 不会再忘记</p>
         </div>
         <button
-          onClick={() => setModal({ open: true })}
+          onClick={openCreate}
           className="bg-sakura rounded-soft px-4 py-2 text-sm text-ash font-medium flex items-center gap-2 hover:bg-sakura/80 transition-colors"
         >
           <Plus size={14} strokeWidth={2} />
@@ -54,9 +75,13 @@ export default function Countdowns({ countdowns = [] }: Props) {
       </div>
 
       {sorted.length === 0 ? (
-        <div className="bg-white/60 border border-dashed border-beige/60 rounded-soft p-12 text-center text-sm text-ash-light">
-          还没有重要日期，添加一个吧 🌷
-        </div>
+        <EmptyState
+          icon={Timer}
+          title="还没有重要日期"
+          hint="生日、纪念日、面试日、deadline——丢一个进来，它会自己倒数。"
+          actionLabel="新建第一个倒计时"
+          onAction={openCreate}
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4">
           {sorted.map((c) => {

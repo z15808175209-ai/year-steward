@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Flame, TrendingUp, Trophy } from 'lucide-react'
+import { Flame, TrendingUp, Trophy, BarChart3 } from 'lucide-react'
 import { db } from '../db'
 import type { Routine, Task } from '../types'
 import {
@@ -9,6 +9,8 @@ import {
   formatPeriodLabel,
   type Period,
 } from '../lib/stats'
+import EmptyState from '../components/EmptyState'
+import { SkeletonCard } from '../components/Skeleton'
 
 interface Props {
   routines: Routine[] | undefined
@@ -33,6 +35,29 @@ export default function Review({ routines = [], tasks = [] }: Props) {
   const stats = computeReviewStats(routines, tasks, logs ?? [], period)
 
   const { rates, heatmap, longestStreak, topRoutine } = stats
+
+  // 弱网 / 首次加载：骨架屏占位
+  if (logs === undefined) {
+    return (
+      <div className="max-w-4xl mx-auto px-10 py-10">
+        <div className="mb-8">
+          <div className="text-[11px] tracking-[2px] text-ash-light mb-2">{formatPeriodLabel(period)}</div>
+          <h1 className="text-3xl text-ash font-light">复盘</h1>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    )
+  }
+
+  // 完全没有数据时的集中空白态
+  const hasData = routines.length > 0 || tasks.length > 0 || logs.length > 0
 
   return (
     <div className="max-w-4xl mx-auto px-10 py-10">
@@ -67,6 +92,8 @@ export default function Review({ routines = [], tasks = [] }: Props) {
         </div>
       </div>
 
+      {hasData ? (
+        <>
       {/* Routine 完成率（突出） */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -202,6 +229,14 @@ export default function Review({ routines = [], tasks = [] }: Props) {
           </div>
         )}
       </div>
+        </>
+      ) : (
+        <EmptyState
+          icon={BarChart3}
+          title="复盘还没有数据"
+          hint="去「今日」勾选一个 routine，或在「任务」里新建一条——这里就会开始慢慢长出来。"
+        />
+      )}
     </div>
   )
 }
