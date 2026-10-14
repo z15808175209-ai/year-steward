@@ -1,4 +1,18 @@
-# year-steward · 私人管家
+<p align="center"><img src="public/icon.svg" width="104" alt="year-steward"></p>
+<h1 align="center">year-steward · 私人管家</h1>
+<p align="center"><strong>你随手记，它按时戳你一下。</strong><br>一个韩系盐系的年度管家 Web App：年度计划、固定任务、倒计时、备忘录与复盘。</p>
+
+<p align="center">
+  <a href="https://z15808175209-ai.github.io/year-steward/"><strong>🚀 打开项目入口（在线体验）</strong></a>
+  ・
+  <a href="#核心能力">功能</a>
+  ・
+  <a href="#本地开发">本地运行</a>
+  ・
+  <a href="https://github.com/z15808175209-ai/year-steward/issues">反馈问题</a>
+</p>
+
+<p align="center"><sub>React 18 + TypeScript · Dexie (IndexedDB) · 纯本地数据 · GitHub Pages 自动部署</sub></p>
 
 > 一个温柔的"主动管家" —— 你随手记，它帮你分门别类、定优先级、按时戳你一下；你拖延了，它不催你、只是提醒；你做完了，它会记下让你复盘时看见。
 
@@ -50,12 +64,19 @@ npm run preview
 
 ---
 
+## 项目入口
+
+| 入口 | 地址 |
+|---|---|
+| 🌐 **在线体验** | https://z15808175209-ai.github.io/year-steward/ |
+| 💻 源码仓库 | https://github.com/z15808175209-ai/year-steward |
+
 ## 部署
 
 推送到 `main` 分支会自动触发 GitHub Actions 构建并部署到 GitHub Pages。
 
 ```
-https://<你的用户名>.github.io/year-steward/
+https://z15808175209-ai.github.io/year-steward/
 ```
 
 ---
@@ -85,9 +106,10 @@ https://<你的用户名>.github.io/year-steward/
 
 ## 路线图
 
-- **v0.1（当前）** 5 个核心模块 + 本地存储 + 部署
-- **v0.2** Routine 编辑/删除 + 任务新增弹窗 + 复盘 PNG 导出 + 通知调度
-- **v0.3+** 移动端 PWA + 多设备同步 + AI 理性助理（基于历史数据的决策建议）
+- **M1 ✅** 5 个核心模块 + IndexedDB 本地存储 + GitHub Pages 自动部署
+- **M2 ✅** 数据层（`repo`）+ 任务/倒计时/备忘录/Routine 全部 CRUD + 真实复盘统计
+- **M3（下一步）** 主页面 UI 打磨 + 韩系盐系主题统一
+- **后续** 移动端 PWA + 多设备同步 + AI 理性助理（基于历史数据的决策建议）
 
 ---
 
