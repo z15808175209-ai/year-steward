@@ -86,29 +86,28 @@ export default function App() {
 
       {/* Main */}
       <main className="flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={page}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="h-full overflow-y-auto"
-          >
-            {page === 'dashboard' && (
-              <Dashboard
-                routines={routines}
-                tasks={tasks}
-                countdowns={countdowns}
-                onEditRoutine={(r) => setRoutineModal({ open: true, editing: r })}
-              />
-            )}
-            {page === 'tasks' && <Tasks tasks={tasks} />}
-            {page === 'countdowns' && <Countdowns countdowns={countdowns} />}
-            {page === 'notes' && <Notes notes={notes} />}
-            {page === 'review' && <Review routines={routines} tasks={tasks} />}
-          </motion.div>
-        </AnimatePresence>
+        {/* 注意：这里不能用 AnimatePresence mode="wait" —— 退出动画一旦未触发完成回调，
+            新页面会永远不挂载，表现为「点了侧边栏但页面不变」。改用 key 触发重新挂载。 */}
+        <motion.div
+          key={page}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="h-full overflow-y-auto"
+        >
+          {page === 'dashboard' && (
+            <Dashboard
+              routines={routines}
+              tasks={tasks}
+              countdowns={countdowns}
+              onEditRoutine={(r) => setRoutineModal({ open: true, editing: r })}
+            />
+          )}
+          {page === 'tasks' && <Tasks tasks={tasks} />}
+          {page === 'countdowns' && <Countdowns countdowns={countdowns} />}
+          {page === 'notes' && <Notes notes={notes} />}
+          {page === 'review' && <Review routines={routines} tasks={tasks} />}
+        </motion.div>
       </main>
 
       {/* Routine Modal */}
